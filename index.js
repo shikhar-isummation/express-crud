@@ -27,7 +27,7 @@ app.get('/offices', async (req, res) => {
         res.json(rows);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'An error occurred' });
+        res.status(500).send(`An error occurred \n Error is Below: \n ${error}`);
     }
 });
 
@@ -36,17 +36,30 @@ app.get('/offices/:officeCode', async (req, res) => {
     const officeCode = req.params.officeCode;
     try {
         const connection = await pool.getConnection();
-        const [rows] = await connection.query('SELECT * FROM offices WHERE officeCode = ?', [officeCode]);
+        const [rows] = await connection.query(`
+        SELECT
+          e.employeeNumber,
+          e.lastName,
+          e.firstName,
+          o.officeCode,
+          o.city AS officeCity
+        FROM
+          offices AS o
+        RIGHT JOIN
+          employees AS e ON o.officeCode = e.officeCode
+        WHERE
+          o.officeCode = ?;
+      `, [officeCode]);
         connection.release();
 
         if (rows.length === 0) {
             res.status(404).json({ message: 'Office not found' });
         } else {
-            res.json(rows[0]);
+            res.json(rows);
         }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'An error occurred' });
+        res.status(500).send(`An error occurred \n Error is Below: \n ${error}`);
     }
 });
 
@@ -82,7 +95,7 @@ app.delete('/offices/:officeCode', async (req, res) => {
         }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'An error occurred' });
+        res.status(500).send(`An error occurred \n Error is Below: \n ${error}`);
     }
 });
 
@@ -106,7 +119,7 @@ app.patch('/offices/:officeCode', async (req, res) => {
         }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'An error occurred' });
+        res.status(500).send(`An error occurred \n Error is Below: \n ${error}`);
     }
 });
 
