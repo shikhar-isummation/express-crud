@@ -38,11 +38,7 @@ app.get('/offices/:officeCode', async (req, res) => {
         const connection = await pool.getConnection();
         const [rows] = await connection.query(`
         SELECT
-          e.employeeNumber,
-          e.lastName,
-          e.firstName,
-          o.officeCode,
-          o.city AS officeCity
+         *
         FROM
           offices AS o
         RIGHT JOIN
